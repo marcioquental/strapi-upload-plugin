@@ -41,6 +41,31 @@ const combineFilters = params => {
   }
 };
 
+const fileToBuffer = (filename, cb) => {
+  console.log('Calling fileToBuffer: ', filename);
+  let readStream = fs.createReadStream(filename);
+  let chunks = [];
+
+  // Handle any errors while reading
+  readStream.on('error', err => {
+      // handle error
+
+      // File could not be read
+      return cb(err);
+  });
+
+  // Listen for data
+  readStream.on('data', chunk => {
+      chunks.push(chunk);
+  });
+
+  // File is done being read
+  readStream.on('close', () => {
+      // Create a buffer of the image from the stream
+      return cb(null, Buffer.concat(chunks));
+  });
+}
+
 module.exports = {
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = '.' + mime.extension(type) || path.extname(filename);
@@ -79,7 +104,9 @@ module.exports = {
   },
 
   async enhanceFile(file, fileInfo = {}, metas = {}) {
-    const readBuffer = await util.promisify(fs.readFile)(file.path);
+    console.error('Before create file buffer');
+    // const readBuffer = await util.promisify(fs.readFile)(file.path);
+    const readBuffer = await util.promisify(fileToBuffer)(file.path);
 
     const { optimize } = strapi.plugins.upload.services['image-manipulation'];
 
