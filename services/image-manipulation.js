@@ -36,7 +36,9 @@ const generateThumbnail = async file => {
   const { width, height } = await getDimensions(file.buffer);
 
   if (width > THUMBNAIL_RESIZE_OPTIONS.width || height > THUMBNAIL_RESIZE_OPTIONS.height) {
+    console.log("\nbefore resizeTo");
     const newBuff = await resizeTo(file.buffer, THUMBNAIL_RESIZE_OPTIONS);
+    console.log('after resizeTo');
 
     if (newBuff) {
       const { width, height, size } = await getMetadatas(newBuff);

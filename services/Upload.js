@@ -103,18 +103,13 @@ module.exports = {
   },
 
   async enhanceFile(file, fileInfo = {}, metas = {}) {
-    console.error('Before create file buffer');
     // const readBuffer = await util.promisify(fs.readFile)(file.path);
     const readBuffer = await util.promisify(fileToBuffer)(file.path);
-    console.error('After create file buffer');
 
     const { optimize } = strapi.plugins.upload.services['image-manipulation'];
 
-    console.error('Before optimize');
     const { buffer, info } = await optimize(readBuffer);
-    console.error('After optimize');
 
-    console.error('Before formattedFile');
     const formattedFile = this.formatFileInfo(
       {
         filename: file.name,
@@ -124,7 +119,6 @@ module.exports = {
       fileInfo,
       metas
     );
-    console.error('After formattedFile');
 
     return _.assign(formattedFile, info, {
       buffer,
@@ -138,15 +132,9 @@ module.exports = {
     const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
     const doUpload = async (file, fileInfo) => {
-      console.log('before enhanceFile');
       const fileData = await this.enhanceFile(file, fileInfo, metas);
-      console.log('after enhanceFile');
 
-      const uploadFileAndPersistResult = this.uploadFileAndPersist(fileData);
-
-      console.log('after uploadFileAndPersist');
-
-      return uploadFileAndPersistResult;
+      return this.uploadFileAndPersist(fileData);
     };
 
     return await Promise.all(
@@ -167,9 +155,13 @@ module.exports = {
     await strapi.plugins.upload.provider.upload(fileData);
     console.log('after strapi.plugins.upload.provider.upload');
 
+    console.log('before generateThumbnail');
     const thumbnailFile = await generateThumbnail(fileData);
+    console.log('after generateThumbnail');
     if (thumbnailFile) {
+      console.log('before upload thumbnail');
       await strapi.plugins.upload.provider.upload(thumbnailFile);
+      console.log('after upload thumbnail');
       delete thumbnailFile.buffer;
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     }
