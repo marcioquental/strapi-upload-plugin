@@ -166,14 +166,18 @@ module.exports = {
       _.set(fileData, 'formats.thumbnail', thumbnailFile);
     }
 
+    console.log('before generateResponsiveFormats');
     const formats = await generateResponsiveFormats(fileData);
+    console.log('after generateResponsiveFormats');
     if (Array.isArray(formats) && formats.length > 0) {
       for (const format of formats) {
         if (!format) continue;
 
         const { key, file } = format;
 
+        console.log('before upload responsiveFormat');
         await strapi.plugins.upload.provider.upload(file);
+        console.log('after upload responsiveFormat');
         delete file.buffer;
 
         _.set(fileData, ['formats', key], file);
@@ -293,9 +297,12 @@ module.exports = {
   },
 
   async add(values) {
+    console.log("\nmedia values", values);
     sendMediaMetrics(values);
 
+    console.log('before create media');
     const res = await strapi.query('file', 'upload').create(values);
+    console.log('after create media');
     strapi.eventHub.emit('media.create', { media: res });
     return res;
   },
