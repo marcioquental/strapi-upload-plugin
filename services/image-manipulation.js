@@ -105,18 +105,24 @@ const generateResponsiveFormats = async file => {
       const breakpoint = BREAKPOINTS[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, { file, breakpoint, originalDimensions });
+        console.log('before generate breakpoint: ', breakpoint);
+        const generateBreakpointResult = generateBreakpoint(key, { file, breakpoint, originalDimensions });
+        console.log('after generate breakpoint: ', breakpoint);
+        return generateBreakpointResult
       }
     })
   );
 };
 
 const generateBreakpoint = async (key, { file, breakpoint }) => {
+  console.log("\n\nenerateBreakpoint");
   const newBuff = await resizeTo(file.buffer, {
     width: breakpoint,
     height: breakpoint,
     fit: 'inside',
   });
+
+  console.log('new buffer: ', newBuff);
 
   if (newBuff) {
     const { width, height, size } = await getMetadatas(newBuff);
