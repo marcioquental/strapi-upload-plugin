@@ -42,7 +42,6 @@ const combineFilters = params => {
 };
 
 const fileToBuffer = (filename, cb) => {
-  console.log('Calling fileToBuffer: ', filename);
   let readStream = fs.createReadStream(filename);
   let chunks = [];
 
@@ -56,7 +55,6 @@ const fileToBuffer = (filename, cb) => {
 
   // Listen for data
   readStream.on('data', chunk => {
-    console.log('Reading chunk: ', chunk);
     chunks.push(chunk);
   });
 
@@ -140,9 +138,15 @@ module.exports = {
     const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
     const doUpload = async (file, fileInfo) => {
+      console.log('before enhanceFile');
       const fileData = await this.enhanceFile(file, fileInfo, metas);
+      console.log('after enhanceFile');
 
-      return this.uploadFileAndPersist(fileData);
+      const uploadFileAndPersistResult = this.uploadFileAndPersist(fileData);
+
+      console.log('after uploadFileAndPersist');
+
+      return uploadFileAndPersistResult;
     };
 
     return await Promise.all(
@@ -159,7 +163,9 @@ module.exports = {
       generateResponsiveFormats,
     } = strapi.plugins.upload.services['image-manipulation'];
 
+    console.log('before strapi.plugins.upload.provider.upload');
     await strapi.plugins.upload.provider.upload(fileData);
+    console.log('after strapi.plugins.upload.provider.upload');
 
     const thumbnailFile = await generateThumbnail(fileData);
     if (thumbnailFile) {
