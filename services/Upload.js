@@ -48,21 +48,22 @@ const fileToBuffer = (filename, cb) => {
 
   // Handle any errors while reading
   readStream.on('error', err => {
-      // handle error
+    // handle error
 
-      // File could not be read
-      return cb(err);
+    // File could not be read
+    return cb(err);
   });
 
   // Listen for data
   readStream.on('data', chunk => {
-      chunks.push(chunk);
+    console.log('Reading chunk: ', chunk);
+    chunks.push(chunk);
   });
 
   // File is done being read
   readStream.on('close', () => {
-      // Create a buffer of the image from the stream
-      return cb(null, Buffer.concat(chunks));
+    // Create a buffer of the image from the stream
+    return cb(null, Buffer.concat(chunks));
   });
 }
 
@@ -107,11 +108,15 @@ module.exports = {
     console.error('Before create file buffer');
     // const readBuffer = await util.promisify(fs.readFile)(file.path);
     const readBuffer = await util.promisify(fileToBuffer)(file.path);
+    console.error('After create file buffer');
 
     const { optimize } = strapi.plugins.upload.services['image-manipulation'];
 
+    console.error('Before optimize');
     const { buffer, info } = await optimize(readBuffer);
+    console.error('After optimize');
 
+    console.error('Before formattedFile');
     const formattedFile = this.formatFileInfo(
       {
         filename: file.name,
@@ -121,6 +126,7 @@ module.exports = {
       fileInfo,
       metas
     );
+    console.error('After formattedFile');
 
     return _.assign(formattedFile, info, {
       buffer,
